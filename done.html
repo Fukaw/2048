@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>CodingClub 2048</title>
+		<style>
+			html, head, body { margin: 0; padding: 0; }
+			.newGame { position: absolute; left:0; right: 0; margin: 0 auto; margin-top: 20px; z-index: 1; }
+			.gameover { visibility: hidden; color: #933; font-size: 32px; font-weight: bold; text-align: center; display: block; position: absolute; left:0; right: 0; margin: 0 auto; margin-top: 130px; z-index: 1; }
+			.game {
+				background-color: #EEE;
+				margin: 0;
+				padding: 10px;
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				left: 0;
+				right: 0;
+				margin: auto;
+				display: table-cell;
+				text-align: center;
+				z-index: -1;
+			}
+			.row {
+				background-color: #AAA;
+				display: inline-block;
+				padding: 0;
+				padding-top: 10px;
+				margin: 0 auto;
+			}
+			.row:first-child { margin-top: 10%; border-radius: 6px 6px 0 0; }
+			.row:last-child { padding-bottom: 10px; border-radius: 0 0 6px 6px; }
+			
+			.col {
+				background-color: #FFF;
+				display: inline-block;
+				height: 50px;
+				margin: 0;
+				margin-left: 10px;
+				padding: 0;
+				width: 50px;
+				text-align: middle;
+				font-weight: bold;
+				font-size: 32px;
+				line-height: 50px;
+				vertical-align: middle;
+			}
+			.col:last-child { margin-right: 10px; }
+
+			.col[data-num='2'] {
+				background-color: #eee4da;
+			}
+
+			.col[data-num='4'] {
+				background-color: #ede0c8;
+			}
+
+			.col[data-num='8'] {
+				background-color: #f2b179;
+			}
+
+			.col[data-num='16'] {
+				background-color: #f59563;
+			}
+
+			.col[data-num='32'] {
+				background-color: #f67c5f;
+			}
+
+			.col[data-num='64'] {
+				background-color: #f65e3b;
+			}
+
+			.col[data-num='128'] {
+				background-color: #edcf72;
+			}
+
+			.col[data-num='256'] {
+				background-color: #edcc61;
+			}
+
+			.col[data-num='512'] {
+				background-color: #edc850;
+			}
+
+			.col[data-num='1024'] {
+				background-color: #edc53f;
+			}
+
+			.col[data-num='2048'] {
+				background-color: #edc22e;
+			}
+		</style>
+		<script>
+			function getMap() {
+				var rows = document.getElementsByClassName("row");
+				var map = [];
+				map[0] = rows[0].getElementsByClassName("col");
+				map[1] = rows[1].getElementsByClassName("col");
+				map[2] = rows[2].getElementsByClassName("col");
+				map[3] = rows[3].getElementsByClassName("col");
+				return map;
+			}
+		
+			function operate_move(cell1, cell2)
+			{
+				if (cell1.innerHTML == "" && cell2.innerHTML != "")
+				{
+					cell1.setAttribute('data-num', cell2.getAttribute('data-num'));
+					cell2.setAttribute('data-num', '');
+					cell1.innerHTML = cell2.innerHTML;
+					cell2.innerHTML = "";
+					return true;
+				}
+				else if (cell1.innerHTML != "" && cell1.innerHTML == cell2.innerHTML)
+				{
+					cell1.innerHTML = 2 * parseInt(cell1.innerHTML);
+					cell1.setAttribute('data-num', cell1.innerHTML);
+					cell2.innerHTML = "";
+					cell2.setAttribute('data-num', '');
+					return true;
+				}
+				return false;
+			}
+		
+			function vers_bas() {
+				var map = getMap();
+				var col = 0;
+				var hasMoved = false;
+				for (col = 0; col < 4; col++)
+					for (row = 3; row >= 1; row--)
+						if (operate_move(map[row][col], map[row - 1][col]))
+						{
+							row = 4;
+							hasMoved = true;
+						}
+				return hasMoved;
+			}
+			
+			function vers_haut() {
+				var map = getMap();
+				var col = 0;
+				for (col = 0; col < 4; col++)
+					for (row = 0; row < 3; row++)
+						if (operate_move(map[row][col], map[row + 1][col]))
+						{
+							row = -1;
+							hasMoved = true;
+						}
+				return hasMoved;
+			}
+			
+			function vers_droite() {
+				var map = getMap();
+				var col = 0;
+				var hasMoved = false;
+				for (row = 0; row < 4; row++)
+					for (col = 3; col >= 1; col--)
+						if (operate_move(map[row][col], map[row][col - 1]))
+						{
+							col = 4;
+							hasMoved = true;
+						}
+				return hasMoved;
+			}
+			
+			function vers_gauche() {
+				var map = getMap();
+				var col = 0;
+				var hasMoved = false;
+				for (row = 0; row < 4; row++)
+					for (col = 0; col < 3; col++)
+						if (operate_move(map[row][col], map[row][col + 1]))
+						{
+							col = -1;
+							hasMoved = true;
+						}
+				return hasMoved;
+			}
+			
+			function add_newNumber()
+			{
+				var map = getMap();
+				var col = Math.floor((Math.random() * 4));
+				var row = Math.floor((Math.random() * 4));
+				
+				while (map[row][col].innerHTML != "")
+				{
+					col = Math.floor((Math.random() * 4));
+					row = Math.floor((Math.random() * 4));
+				}
+				
+				map[row][col].innerHTML = "2";
+				map[row][col].setAttribute('data-num', '2');
+			}
+			
+			function hasLost()
+			{
+				var map = getMap();
+				var hasLost = true;
+				for (col = 0; col < 4; col++)
+					for (row = 0; row < 4; row++)
+						if (map[row][col].innerHTML == "")
+							hasLost = false;
+				if (hasLost)
+					document.getElementsByClassName("gameover")[0].style.visibility = "visible";
+				return hasLost;
+			}
+			
+			function newGame()
+			{
+				document.getElementsByClassName("gameover")[0].style.visibility = "hidden";
+				var map = getMap();
+				for (col = 0; col < 4; col++)
+					for (row = 0; row < 4; row++)
+						map[row][col].innerHTML = "";
+				add_newNumber();
+			}
+			
+			document.onkeydown = function(e) {
+				e = e || window.event;
+				switch(e.which || e.keyCode) {
+					case 37: // left
+						if (!hasLost() && vers_gauche())
+							add_newNumber();
+						break;
+					case 38: // up
+						if (!hasLost() && vers_haut())
+							add_newNumber();
+						break;
+					case 39: // right
+						if (!hasLost() && vers_droite())
+							add_newNumber();
+						break;
+					case 40: // down
+						if (!hasLost() && vers_bas())
+							add_newNumber();
+						break;
+					default: return; // exit this handler for other keys
+				}
+				e.preventDefault(); // prevent the default action (scroll / move caret)
+			};
+		</script>
+	</head>
+	<body>
+		<img src="newgame.png" alt="newgame" class="newGame" onclick="newGame();" />
+		<div class="gameover">Perdu !</div>
+		<div class="game">
+			<div class="row">
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+			</div><br/>
+			<div class="row">
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+			</div><br />
+			<div class="row">
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+			</div><br />
+			<div class="row">
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+				<div class="col"></div>
+			</div>
+		</div>
+		<script>newGame();</script>
+	</body>
+</html>
